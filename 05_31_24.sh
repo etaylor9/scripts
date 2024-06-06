@@ -19,7 +19,7 @@ GROUP_SCRATCH="."
 outdir=$GROUP_SCRATCH/simulations/results/05_31_24/$SLURM_JOB_ID
 mkdir -p $outdir
 
-pyscript=$HOME/simulations/scripts/05_31_24.py #HAVE TO ACTUALLY PUT THE SCRIPT NAME HERE
+pyscript=$HOME/scripts/05_31_24.py #HAVE TO ACTUALLY PUT THE SCRIPT NAME HERE
 
 # Copy the python script and this shell script to the results directory
 cp -u $pyscript $outdir/
