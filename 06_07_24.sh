@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name= hexagonalLattice
+#SBATCH --job-name=hexagonalLattice
 #SBATCH --output=slurm-%A.out
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=8GB
@@ -21,7 +21,7 @@ export LD_LIBRARY_PATH=${CONDA_PREFIX}/lib:${LD_LIBRARY_PATH}
 outdir=$GROUP_SCRATCH/simulations/results/06_07_24/$SLURM_JOB_ID
 mkdir -p $outdir
 
-pyscript=$HOME/scripts/06_07_24.py #HAVE TO ACTUALLY PUT THE SCRIPT NAME HERE
+pyscript=$HOME/scripts/06_07_24_f=TH.py #HAVE TO ACTUALLY PUT THE SCRIPT NAME HERE
 
 # Copy the python script and this shell script to the results directory
 cp -u $pyscript $outdir/
