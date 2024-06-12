@@ -37,7 +37,7 @@ MAKE_ANIMATIONS = True
 tempdir = tempfile.TemporaryDirectory()
 
 file_path = os.path.expandvars('$GROUP_SCRATCH/simulations/results/06_07_24/')
-f = 2/3
+f = 1
 
 
 # # function that makes a video of our solution 

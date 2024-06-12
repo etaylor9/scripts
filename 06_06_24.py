@@ -1,3 +1,19 @@
+# -------------------------------- #
+# File Info: 
+    # Hexagonal Josephson Junction Array. Square chip with hexagonal lattice points 
+    # disorder epsilon = 1 for superconducting regions, -0.8 for normal region
+    # f = 2/3
+
+    # Evloution:
+    #   1. 0 --> 10 time units: thermalize
+    #   2. 10 --> 110 time units: B-field applied adiabatically 
+    #   3. 110 --> 600 time units: Evolve
+ 
+
+
+# -------------------------------- #
+
+
 # initializations 
 # %config InlineBackend.figure_formats = {"retina", "png"}
 
@@ -20,14 +36,38 @@ from tdgl.visualization.animate import create_animation
 MAKE_ANIMATIONS = True
 tempdir = tempfile.TemporaryDirectory()
 
-# function that makes a video of our solution 
+file_path = os.path.expandvars('$GROUP_SCRATCH/simulations/results/06_07_24/')
+f = 1/3
+
+
+# # function that makes a video of our solution 
+# def make_video_from_solution(
+#     solution,
+#     quantities=("order_parameter", "phase"),
+#     fps=20,
+#     figsize=(5, 4),
+# ):
+#     """Generates an HTML5 video from a tdgl.Solution."""
+#     with tdgl.non_gui_backend():
+#         with h5py.File(solution.path, "r") as h5file:
+#             anim = create_animation(
+#                 h5file,
+#                 quantities=quantities,
+#                 fps=fps,
+#                 figure_kwargs=dict(figsize=figsize),
+#             )
+#             video = anim.to_html5_video()
+#         return HTML(video)
+
 def make_video_from_solution(
     solution,
     quantities=("order_parameter", "phase"),
     fps=20,
     figsize=(5, 4),
+    save_dir= file_path,
 ):
-    """Generates an HTML5 video from a tdgl.Solution."""
+    """Generates an HTML5 video from a tdgl.Solution and saves it to a file."""
+    save_path = os.path.join(save_dir, f'solution_video_{f}.mp4')
     with tdgl.non_gui_backend():
         with h5py.File(solution.path, "r") as h5file:
             anim = create_animation(
@@ -36,14 +76,16 @@ def make_video_from_solution(
                 fps=fps,
                 figure_kwargs=dict(figsize=figsize),
             )
+            # Save the animation to the specified file
+            anim.save(save_path, writer='ffmpeg')
             video = anim.to_html5_video()
         return HTML(video)
-    
 
+    
 
 # Function to calculate hexagon vertices
 def hexagon_vertices(center, radius):
-    vertices = []
+    vertices = [] 
     for i in range(6):
         angle = np.radians(60 * i)
         x = center[0] + radius * np.cos(angle)
@@ -57,7 +99,11 @@ def is_inside_hexagon(point, hex_vertices):
     hex_path = Path(hex_vertices)
     return hex_path.contains_point(point)
 
-
+# Function to check if a point is inside the box around the lattice points
+def is_inside_square(point, center, width):
+    x, y = point
+    x0, y0 = center
+    return (abs(x - x0) <= width / 2) and (abs(y - y0) <= width / 2)
 
 def linear_ramp(t, tmin, tmax, initial, final):
     """ Linearly interpolates the value of epsilon based on the time t. """
@@ -99,6 +145,7 @@ def epsilon_time(r, t, t_min, t_max, r0_list, side_length, width, height, total_
     # Default condition if not in any special region or time range
     return normal_epsilon
 
+
 # Device Geometry
 total_width = 4000 #nm
 total_height = 4000
@@ -136,7 +183,7 @@ hex_vertices = hexagon_vertices(center, hex_radius)
 hex_vertices_2 = hexagon_vertices(center, hex_radius + 20)
 
 def epsilon_func(r):
-    if is_inside_hexagon(r, hex_vertices_2):
+    if is_inside_square(r, center, height):
         for r0 in r0_list:
             if np.linalg.norm(np.array(r) - np.array(r0)) <= width_island:
                 return epsilon0
@@ -153,7 +200,7 @@ for i in range(-num_squares_per_side, num_squares_per_side + 1):
         if i % 2 == 1:
             y0 += width_island * spacing_factor * 3 / 4
         point = (x0, y0)
-        if is_inside_hexagon(point, hex_vertices):
+        if is_inside_square(point, center, width):
             r0_list.append(point)
             
 
@@ -178,6 +225,10 @@ plt.xlabel('X (nm)')
 plt.ylabel('Y (nm)')
 plt.grid(False)
 
+plot_save_path = os.path.join(file_path, f'epsilon_distribution_{f}.png')
+plt.savefig(plot_save_path)
+plt.close()  # Close the figure to free up memory
+
 # Build the device
 layer = tdgl.Layer(london_lambda=london_lambda, coherence_length=coherence_length, thickness=thickness, gamma=gamma)
 film = (
@@ -197,13 +248,14 @@ IslandDevice.make_mesh(max_edge_length=coherence_length / 2)
 fig, ax = IslandDevice.plot(mesh=True, legend=True)
 IslandDevice.mesh_stats()
 
-
+mesh_plot_save_path = os.path.join(file_path, f'device_mesh_{f}.png')
+fig.savefig(mesh_plot_save_path)
+plt.close(fig)
 
 # calculate the number of vortices we expect to see 
 h = 6.626E-34 
 q = 1.602E-19
 phi_0 = h/(2*q)
-applied_B = 58 #mT
 
 # Function to calculate distance between two points
 def distance(p1, p2):
@@ -227,8 +279,12 @@ p4 = (-spacing_factor * width_island * np.sqrt(3) / 2, spacing_factor * width_is
 areaUnitCell = rhombus_area(p1, p2, p3, p4)
 print(f"The area of the plaquette (rhombus) is: {areaUnitCell:.0f} nm^2")
 
-number_flux_perUnitCell = applied_B*1E-3 * (areaUnitCell*1E-9*1E-9) / phi_0
-print(f'Number of flux quanta per unit cell: {number_flux_perUnitCell:.5f}')
+# number_flux_perUnitCell = applied_B*1E-3 * (areaUnitCell*1E-9*1E-9) / phi_0
+print(f'Filling Factor: {f:.2f}')
+
+applied_B = f * phi_0 * 1E3 / (areaUnitCell*1E-9*1e-9)
+print(f'Applied B field is: {applied_B:.1f} mT')
+
 
 from tdgl.sources import LinearRamp, ConstantField
 # Ramp the applied field 
@@ -237,28 +293,37 @@ applied_vector_potential = (
     * ConstantField(applied_B, field_units="mT", length_units=IslandDevice.length_units)
 )
 
-
 options = tdgl.SolverOptions(
     solve_time= 600,
     current_units="uA",
     field_units="mT",
-    output_file=os.path.join(tempdir.name, "seed_solutionB.h5"),
+    output_file=os.path.join(tempdir.name, "zeroExcitation_solution.h5"),
 )
-excitation_solution = tdgl.solve(
+zeroExcitation_solution = tdgl.solve(
     IslandDevice,
     options,
     applied_vector_potential = applied_vector_potential, 
     disorder_epsilon= epsilon_func, 
 )
+_ = zeroExcitation_solution.plot_order_parameter()
+fig, ax = zeroExcitation_solution.plot_currents()
 
-_ = excitation_solution.plot_order_parameter()
-fig, ax = excitation_solution.plot_currents()
+zeroExcitation_solution_path = os.path.join(file_path, f'final_solution{f}.png')
+fig.savefig(zeroExcitation_solution_path)
+plt.close(fig)
 
-excitation_solution_video = make_video_from_solution(
-        excitation_solution,
-        quantities=["order_parameter", "phase", "scalar_potential"],
-        figsize=(6.5, 4),
-    )
-display(excitation_solution)
+# zeroExcitation_solution_video = make_video_from_solution(
+#         zeroExcitation_solution,
+#         quantities=["order_parameter", "phase", "scalar_potential"],
+#         figsize=(6.5, 4),
+#     )
+# display(zeroExcitation_solution_video)
 
 
+zeroExcitation_solution_video = make_video_from_solution(
+    zeroExcitation_solution,
+    quantities=["order_parameter", "phase", "scalar_potential"],
+    figsize=(6.5, 4),
+    save_dir= file_path,
+)
+display(zeroExcitation_solution_video)

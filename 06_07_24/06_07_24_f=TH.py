@@ -2,13 +2,14 @@
 # File Info: 
     # Hexagonal Josephson Junction Array. Square chip with hexagonal lattice points 
     # disorder epsilon = 1 for superconducting regions, -0.8 for normal region
-    # f = 1
+    # f = 2/3
 
     # Evloution:
     #   1. 0 --> 10 time units: thermalize
     #   2. 10 --> 110 time units: B-field applied adiabatically 
     #   3. 110 --> 600 time units: Evolve
  
+
 
 # -------------------------------- #
 
@@ -35,14 +36,38 @@ from tdgl.visualization.animate import create_animation
 MAKE_ANIMATIONS = True
 tempdir = tempfile.TemporaryDirectory()
 
-# function that makes a video of our solution 
+file_path = os.path.expandvars('$GROUP_SCRATCH/simulations/results/06_07_24/')
+f = 2/3
+
+
+# # function that makes a video of our solution 
+# def make_video_from_solution(
+#     solution,
+#     quantities=("order_parameter", "phase"),
+#     fps=20,
+#     figsize=(5, 4),
+# ):
+#     """Generates an HTML5 video from a tdgl.Solution."""
+#     with tdgl.non_gui_backend():
+#         with h5py.File(solution.path, "r") as h5file:
+#             anim = create_animation(
+#                 h5file,
+#                 quantities=quantities,
+#                 fps=fps,
+#                 figure_kwargs=dict(figsize=figsize),
+#             )
+#             video = anim.to_html5_video()
+#         return HTML(video)
+
 def make_video_from_solution(
     solution,
     quantities=("order_parameter", "phase"),
     fps=20,
     figsize=(5, 4),
+    save_dir= file_path,
 ):
-    """Generates an HTML5 video from a tdgl.Solution."""
+    """Generates an HTML5 video from a tdgl.Solution and saves it to a file."""
+    save_path = os.path.join(save_dir, f'solution_video_{f}.mp4')
     with tdgl.non_gui_backend():
         with h5py.File(solution.path, "r") as h5file:
             anim = create_animation(
@@ -51,8 +76,11 @@ def make_video_from_solution(
                 fps=fps,
                 figure_kwargs=dict(figsize=figsize),
             )
+            # Save the animation to the specified file
+            anim.save(save_path, writer='ffmpeg')
             video = anim.to_html5_video()
         return HTML(video)
+
     
 
 # Function to calculate hexagon vertices
@@ -197,6 +225,10 @@ plt.xlabel('X (nm)')
 plt.ylabel('Y (nm)')
 plt.grid(False)
 
+plot_save_path = os.path.join(file_path, f'epsilon_distribution_{f}.png')
+plt.savefig(plot_save_path)
+plt.close()  # Close the figure to free up memory
+
 # Build the device
 layer = tdgl.Layer(london_lambda=london_lambda, coherence_length=coherence_length, thickness=thickness, gamma=gamma)
 film = (
@@ -216,11 +248,14 @@ IslandDevice.make_mesh(max_edge_length=coherence_length / 2)
 fig, ax = IslandDevice.plot(mesh=True, legend=True)
 IslandDevice.mesh_stats()
 
+mesh_plot_save_path = os.path.join(file_path, f'device_mesh_{f}.png')
+fig.savefig(mesh_plot_save_path)
+plt.close(fig)
+
 # calculate the number of vortices we expect to see 
 h = 6.626E-34 
 q = 1.602E-19
 phi_0 = h/(2*q)
-f = 1
 
 # Function to calculate distance between two points
 def distance(p1, p2):
@@ -273,9 +308,22 @@ zeroExcitation_solution = tdgl.solve(
 _ = zeroExcitation_solution.plot_order_parameter()
 fig, ax = zeroExcitation_solution.plot_currents()
 
+zeroExcitation_solution_path = os.path.join(file_path, f'final_solution{f}.png')
+fig.savefig(zeroExcitation_solution_path)
+plt.close(fig)
+
+# zeroExcitation_solution_video = make_video_from_solution(
+#         zeroExcitation_solution,
+#         quantities=["order_parameter", "phase", "scalar_potential"],
+#         figsize=(6.5, 4),
+#     )
+# display(zeroExcitation_solution_video)
+
+
 zeroExcitation_solution_video = make_video_from_solution(
-        zeroExcitation_solution,
-        quantities=["order_parameter", "phase", "scalar_potential"],
-        figsize=(6.5, 4),
-    )
+    zeroExcitation_solution,
+    quantities=["order_parameter", "phase", "scalar_potential"],
+    figsize=(6.5, 4),
+    save_dir= file_path,
+)
 display(zeroExcitation_solution_video)

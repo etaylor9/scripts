@@ -36,7 +36,7 @@ from tdgl.visualization.animate import create_animation
 MAKE_ANIMATIONS = True
 tempdir = tempfile.TemporaryDirectory()
 
-file_path = os.path.expandvars('$GROUP_SCRATCH/simulations/results/06_07_24/')
+file_path = os.path.expandvars('$GROUP_SCRATCH/simulations/results/06_12_24/')
 f = 2/3
 
 
