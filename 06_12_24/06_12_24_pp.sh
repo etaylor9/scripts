@@ -18,10 +18,13 @@ conda activate TDGL
 export LD_LIBRARY_PATH=${CONDA_PREFIX}/lib:${LD_LIBRARY_PATH}
 
 # GROUP_SCRATCH="."
+##### !!!!!!!!!!!!!!!! CHANGE THIS !!!!!!!!!!!!!!!! #####
 outdir=$GROUP_SCRATCH/simulations/results/06_12_24/$SLURM_JOB_ID
 mkdir -p $outdir
 
-pyscript=$HOME/scripts/06_12_24/06_12_24_.py #HAVE TO ACTUALLY PUT THE SCRIPT NAME HERE
+##### !!!!!!!!!!!!!!!! CHANGE THIS !!!!!!!!!!!!!!!! #####
+pyscript=$HOME/scripts/06_12_24/06_12_24_.py 
+
 
 # Copy the python script and this shell script to the results directory
 cp -u $pyscript $outdir/
