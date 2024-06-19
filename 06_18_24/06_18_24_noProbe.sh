@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=hexagonalLattice
+#SBATCH --job-name=hexagonalLatticenoProbePoints
 #SBATCH --output=slurm-%A.out
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=8GB
@@ -18,25 +18,25 @@ conda activate TDGL
 export LD_LIBRARY_PATH=${CONDA_PREFIX}/lib:${LD_LIBRARY_PATH}
 
 # GROUP_SCRATCH="."
-outdir=$GROUP_SCRATCH/simulations/results/06_18_24/$SLURM_JOB_ID
+outdir=$GROUP_SCRATCH/simulations/results/06_18_24/noProbe/$SLURM_JOB_ID
 mkdir -p $outdir
 
-pyscript=$HOME/scripts/06_18_24/06_18_24.py #HAVE TO ACTUALLY PUT THE SCRIPT NAME HERE
+pyscript=$HOME/scripts/06_18_24/06_18_24_noProbe.py #HAVE TO ACTUALLY PUT THE SCRIPT NAME HERE
 
 # Copy the python script and this shell script to the results directory
 cp -u $pyscript $outdir/
 cp -u $0 $outdir/
 
-f_values = (1/3 2/3 1)
+# Define the values of f as fractions
+f_values=("1/3" "2/3" "1")
 
-for f in "${f_values[@]}"; do 
-    outdir = $outdir_base/f_$f
-    mkdir -p $outdir
-    python $pyscript --f $f --directory=$outdir 
+for f in "${f_values[@]}"; do
+    # Evaluate the fraction using awk
+    f_decimal=$(awk "BEGIN {print $f}")
 
-    cp -u $pyscript $outdir/
-    cp -u $0 $outdir/ 
-done 
+    # Run the Python script with the --f argument
+    python $pyscript --f $f_decimal --directory=$outdir
+done
 
 # Move the stdout log to the results directory
 mv "slurm-${SLURM_JOB_ID}.out" $outdir
