@@ -32,7 +32,7 @@ MAKE_ANIMATIONS = True
 tempdir = tempfile.TemporaryDirectory()
 
 # !!!!! REMEMBER TO CHANGE THE FILE_PATH AND THE FILLING FACTOR !!!!! #
-file_path = os.path.expandvars('$GROUP_SCRATCH/simulations/results/06_18_24/')
+file_path = os.path.expandvars('$GROUP_SCRATCH/simulations/results/06_18_24/noProbe/')
 
 parser = argparse.ArgumentParser(description='Hexagonal Josephson Junction Array Simulation')
 parser.add_argument('--f', type=float, required=True, help='Filling factor')

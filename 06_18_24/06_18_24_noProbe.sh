@@ -9,21 +9,20 @@ set -x
 
 module load media ffmpeg
 
-# GROUP_HOME="."
-
-# Activate conda env
+# Activate conda environment
 source $GROUP_HOME/miniconda3/bin/activate
 conda activate TDGL
 
 export LD_LIBRARY_PATH=${CONDA_PREFIX}/lib:${LD_LIBRARY_PATH}
 
-# GROUP_SCRATCH="."
+# Create output directory in scratch space
 outdir=$GROUP_SCRATCH/simulations/results/06_18_24/noProbe/$SLURM_JOB_ID
 mkdir -p $outdir
 
-pyscript=$HOME/scripts/06_18_24/06_18_24_noProbe.py #HAVE TO ACTUALLY PUT THE SCRIPT NAME HERE
+# Specify the Python script path
+pyscript=$HOME/scripts/06_18_24/06_18_24_noProbe.py
 
-# Copy the python script and this shell script to the results directory
+# Copy the Python script and this shell script to the results directory
 cp -u $pyscript $outdir/
 cp -u $0 $outdir/
 
