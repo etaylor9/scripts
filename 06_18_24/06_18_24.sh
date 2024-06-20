@@ -18,7 +18,7 @@ conda activate TDGL
 export LD_LIBRARY_PATH=${CONDA_PREFIX}/lib:${LD_LIBRARY_PATH}
 
 # GROUP_SCRATCH="."
-outdir=$GROUP_SCRATCH/simulations/results/06_18_24/$SLURM_JOB_ID
+outdir=$GROUP_SCRATCH/simulations/results/06_18_24/WithProbes/$SLURM_JOB_ID
 mkdir -p $outdir
 
 pyscript=$HOME/scripts/06_18_24/06_18_24.py #HAVE TO ACTUALLY PUT THE SCRIPT NAME HERE
@@ -27,16 +27,16 @@ pyscript=$HOME/scripts/06_18_24/06_18_24.py #HAVE TO ACTUALLY PUT THE SCRIPT NAM
 cp -u $pyscript $outdir/
 cp -u $0 $outdir/
 
-f_values = (1/3 2/3 1)
+# Define the values of f as fractions
+f_values=("1/3" "2/3" "1")
 
-for f in "${f_values[@]}"; do 
-    outdir = $outdir_base/f_$f
-    mkdir -p $outdir
-    python $pyscript --f $f --directory=$outdir 
+for f in "${f_values[@]}"; do
+    # Evaluate the fraction using awk
+    f_decimal=$(awk "BEGIN {print $f}")
 
-    cp -u $pyscript $outdir/
-    cp -u $0 $outdir/ 
-done 
+    # Run the Python script with the --f and --outdir arguments
+    python $pyscript --f $f_decimal --outdir $outdir
+done
 
 # Move the stdout log to the results directory
 mv "slurm-${SLURM_JOB_ID}.out" $outdir

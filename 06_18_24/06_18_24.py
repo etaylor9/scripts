@@ -15,12 +15,9 @@
 
 '''
 
-# initializations 
-# %config InlineBackend.figure_formats = {"retina", "png"}
-
 import os
 import tempfile
-import argparse 
+import argparse
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
 
 from IPython.display import HTML, display
@@ -33,18 +30,18 @@ import tdgl
 import types
 from tdgl.geometry import box, circle
 from tdgl.visualization.animate import create_animation
+
 MAKE_ANIMATIONS = True
 tempdir = tempfile.TemporaryDirectory()
 
-# !!!!! REMEMBER TO CHANGE THE FILE_PATH AND THE FILLING FACTOR !!!!! #
-file_path = os.path.expandvars('$GROUP_SCRATCH/simulations/results/06_18_24/')
-
 parser = argparse.ArgumentParser(description='Hexagonal Josephson Junction Array Simulation')
 parser.add_argument('--f', type=float, required=True, help='Filling factor')
+parser.add_argument('--outdir', type=str, required=True, help='Output directory')
+
 args = parser.parse_args()
 
 f = args.f
-
+file_path = args.outdir
 # !!!!!  !!!!! # 
 
 
@@ -343,9 +340,6 @@ fig, ax = zeroExcitation_solution.plot_currents()
 zeroExcitation_solution_path = os.path.join(file_path, f'fullevolution_current{f:.2f}.png')
 fig.savefig(zeroExcitation_solution_path)
 
-fig, ax = zeroExcitation_solution.dynamics.plot_all_pairs()
-zeroExcitation_solution_path = os.path.join(file_path, f'voltage_full{f:.2f}.png')
-fig.savefig(zeroExcitation_solution_path)
 
 zeroExcitation_solution_video = make_video_from_solution(
     zeroExcitation_solution,
@@ -355,3 +349,7 @@ zeroExcitation_solution_video = make_video_from_solution(
     save_dir= file_path,
 )
 display(zeroExcitation_solution_video)
+
+fig, ax = zeroExcitation_solution.dynamics.plot_all_pairs()
+zeroExcitation_solution_path = os.path.join(file_path, f'voltage_full{f:.2f}.png')
+fig.savefig(zeroExcitation_solution_path)
