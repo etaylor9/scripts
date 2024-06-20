@@ -12,10 +12,9 @@
  
 # -------------------------------- #
 
-
 import os
 import tempfile
-import argparse 
+import argparse
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
 
 from IPython.display import HTML, display
@@ -28,18 +27,18 @@ import tdgl
 import types
 from tdgl.geometry import box, circle
 from tdgl.visualization.animate import create_animation
+
 MAKE_ANIMATIONS = True
 tempdir = tempfile.TemporaryDirectory()
 
-# !!!!! REMEMBER TO CHANGE THE FILE_PATH AND THE FILLING FACTOR !!!!! #
-file_path = os.path.expandvars('$GROUP_SCRATCH/simulations/results/06_18_24/noProbe/')
-
 parser = argparse.ArgumentParser(description='Hexagonal Josephson Junction Array Simulation')
 parser.add_argument('--f', type=float, required=True, help='Filling factor')
+parser.add_argument('--outdir', type=str, required=True, help='Output directory')
+
 args = parser.parse_args()
 
 f = args.f
-
+file_path = args.outdir
 # !!!!!  !!!!! # 
 
 def make_video_from_solution(

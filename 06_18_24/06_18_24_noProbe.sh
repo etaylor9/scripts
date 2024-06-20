@@ -33,8 +33,8 @@ for f in "${f_values[@]}"; do
     # Evaluate the fraction using awk
     f_decimal=$(awk "BEGIN {print $f}")
 
-    # Run the Python script with the --f argument
-    python $pyscript --f $f_decimal --directory=$outdir
+    # Run the Python script with the --f and --outdir arguments
+    python $pyscript --f $f_decimal --outdir $outdir
 done
 
 # Move the stdout log to the results directory
