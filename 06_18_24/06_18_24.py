@@ -330,6 +330,8 @@ zeroExcitation_solution = tdgl.solve(
     options,
     applied_vector_potential = applied_vector_potential, 
     disorder_epsilon= epsilon_func, 
+    output_file=os.path.join(file_path, f"zeroExcitation_solution_pp{f}.h5"),
+
 )
 
 fig, ax = zeroExcitation_solution.plot_order_parameter()
@@ -343,7 +345,6 @@ fig.savefig(zeroExcitation_solution_path)
 
 zeroExcitation_solution_video = make_video_from_solution(
     zeroExcitation_solution,
-    solution_type = 'fullevolution',
     quantities=["order_parameter", "phase", "scalar_potential"],
     figsize=(6.5, 4),
     save_dir= file_path,

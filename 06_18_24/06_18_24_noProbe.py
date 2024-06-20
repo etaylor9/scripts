@@ -274,5 +274,7 @@ zeroExcitation_solution_video = make_video_from_solution(
     quantities=["order_parameter", "phase", "scalar_potential"],
     figsize=(6.5, 4),
     save_dir= file_path,
+    output_file=os.path.join(file_path, f"zeroExcitation_solution_NoPp{f}.h5"),
+
 )
 display(zeroExcitation_solution_video)
