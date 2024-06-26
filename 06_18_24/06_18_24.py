@@ -323,14 +323,15 @@ options = tdgl.SolverOptions(
     solve_time= 600,
     current_units="uA",
     field_units="mT",
-    output_file=os.path.join(tempdir.name, "zeroExcitation_solution.h5"),
+    output_file=os.path.join(file_path, f"zeroExcitation_solution_pp{f}.h5"),
+
 )
+
 zeroExcitation_solution = tdgl.solve(
     IslandDevice,
     options,
     applied_vector_potential = applied_vector_potential, 
     disorder_epsilon= epsilon_func, 
-    output_file=os.path.join(file_path, f"zeroExcitation_solution_pp{f}.h5"),
 
 )
 
