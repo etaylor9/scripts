@@ -20,7 +20,7 @@ outdir=$GROUP_SCRATCH/simulations/results/06_26_24/sym/$SLURM_JOB_ID
 mkdir -p $outdir
 
 # Specify the Python script path
-pyscript=$HOME/scripts/06_18_24/06_26_24_sym.py
+pyscript=$HOME/scripts/06_26_24/06_26_24_sym.py
 
 # Copy the Python script and this shell script to the results directory
 cp -u $pyscript $outdir/
