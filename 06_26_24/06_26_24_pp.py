@@ -161,7 +161,6 @@ def epsilon_time(r, t, t_min, t_max, r0_list, side_length, width, height, total_
 
 #  --------------------------------  Device Geometry --------------------------------  #
 
-
 # Device Geometry
 total_width = 5500  # nm
 total_height = 4000
@@ -169,6 +168,7 @@ width = 3500
 height = width
 width_island = 75
 num_squares_per_side = 12
+
 spacing_factor = 1.8
 
 # Device Material Parameters
@@ -181,3 +181,198 @@ gamma = 1
 normal_epsilon = -0.8  # value for normal metal
 epsilon0 = 1  # value for superconducting metal
 excitation_epsilon = 1
+
+
+#  --------------------------------  Epsilon Distribution --------------------------------  #
+
+# Adjust starting point to ensure the device remains centered
+start_x = -width / 2
+start_y = -total_height / 2
+step_x = width_island * spacing_factor * np.sqrt(3)
+step_y = width_island * spacing_factor * 3 / 2
+center = (0, 0)
+excitation_site = (-step_x, step_y ) 
+
+
+def is_inside_square(point, center, width, height):
+    x, y = point
+    x0, y0 = center
+    return (abs(x - x0) <= width / 2) and (abs(y - y0) <= height / 2)
+
+def epsilon_func(r):
+    if is_inside_square(r, center, width, total_height):
+        for r0 in r0_list:
+            if np.linalg.norm(np.array(r) - np.array(r0)) <= width_island:
+                return epsilon0
+        return normal_epsilon
+    else:
+        return epsilon0
+
+r0_list = []
+for i in range(-num_squares_per_side, num_squares_per_side + 1):
+    for j in range(-num_squares_per_side, num_squares_per_side + 1):
+        x0 = i * step_x
+        y0 = j * step_y
+        if i % 2 == 1:
+            y0 += step_y / 2
+        point = (x0, y0)
+        if is_inside_square(point, center, width, total_height):
+            r0_list.append(point)
+
+# Create a higher resolution mesh grid
+x = np.linspace(-total_width / 2, total_width / 2, 400)
+y = np.linspace(-total_height / 2, total_height / 2, 400)
+X, Y = np.meshgrid(x, y)
+Z = np.zeros_like(X)
+
+# Compute epsilon for each point in the grid
+for i in tqdm(range(len(x)), desc="Computing epsilon values", unit="row"):
+    for j in range(len(y)):
+        Z[j, i] = epsilon_func((X[j, i], Y[j, i]))
+
+# Calculate probe points
+probe_points = []
+y_values = list(set([point[1] for point in r0_list]))
+y_values.sort()
+top_y = y_values[-1]
+bottom_y = y_values[0]
+x_values = sorted(list(set([point[0] for point in r0_list if point[1] == top_y])))
+
+for i in range(len(x_values) - 1):
+    x0_top = (x_values[i] + x_values[i + 1]) / 2
+    x0_bottom = (x_values[i] + x_values[i + 1]) / 2
+    probe_points.append((x0_top, top_y))
+    probe_points.append((x0_bottom, bottom_y))
+
+# Plot epsilon distribution and circular sites
+plt.figure(figsize=(10, 10))
+plt.imshow(Z, extent=(-total_width / 2, total_width / 2, -total_height / 2, total_height / 2), origin='lower', cmap='coolwarm')
+plt.colorbar(label='Epsilon value')
+plt.title('Epsilon Distribution Across the Device')
+plt.xlabel('X (nm)')
+plt.ylabel('Y (nm)')
+plt.grid(False)
+plt.scatter([p[0] for p in probe_points], [p[1] for p in probe_points], marker='o', s=70, c='black')
+
+plt.scatter(*excitation_site, marker='o', s=70, c='orange', label='Excitation Site')
+
+# Define rectangle vertices (example)
+p1 = (0, 0)
+p2 = (width_island * 3.5 * spacing_factor, 0)
+p3 = (width_island * 3.5 * spacing_factor, width_island * spacing_factor * 1.5)
+p4 = (0, width_island * spacing_factor * 1.5)
+
+# Calculate the area and plot the rectangle
+area = rectangle_area(p1, p2, p3, p4, plot = False)
+print(f"The area of the rectangle is: {area:.0f} nm^2")
+
+plot_save_path = os.path.join(file_path, f'epsilon_distribution_{f:.2f}.png')
+plt.savefig(plot_save_path)
+plt.show()
+
+#  --------------------------------  Device Construction --------------------------------  #
+# Make the device 
+length_units = "nm"
+
+layer = tdgl.Layer(london_lambda=london_lambda, coherence_length=coherence_length, thickness=thickness, gamma = gamma)
+
+film = (
+    tdgl.Polygon("film", points=box(total_width, total_height))
+    .resample(1290)
+    .buffer(0) #1051
+)
+
+source = tdgl.Polygon("source", points=box(width / 100, height)).translate(dx=-total_width / 2)
+drain = source.translate(dx=total_width).set_name("drain")
+
+# Build the device 
+probe_points = probe_points
+
+IslandDevice = tdgl.Device(
+    "JJ_arrayDevice",
+    layer=layer,
+    film=film,
+    terminals=[source, drain],
+    length_units=length_units,
+    probe_points=probe_points,
+)
+
+IslandDevice.make_mesh(max_edge_length = coherence_length/2 )
+fig, ax = IslandDevice.plot(mesh=False, legend=True)
+IslandDevice.mesh_stats()
+
+mesh_plot_save_path = os.path.join(file_path, f'device_mesh_{f:.2f}.png')
+fig.savefig(mesh_plot_save_path)
+
+#  --------------------------------  Simulation Parameters --------------------------------  #
+
+# calculate the number of vortices we expect to see 
+h = 6.626E-34 
+q = 1.602E-19
+phi_0 = h/(2*q)
+
+
+# Calculate the area of the rhombus formed by the points p1, p2, p3, and p4
+areaUnitCell = rectangle_area(p1, p2, p3, p4, plot = False)
+print(f"The area of the plaquette (rhombus) is: {areaUnitCell:.0f} nm^2")
+
+# number_flux_perUnitCell = applied_B*1E-3 * (areaUnitCell*1E-9*1E-9) / phi_0
+print(f'Filling Factor: {f:.2f}')
+
+applied_B = f * phi_0 * 1E3 / (areaUnitCell*1E-9*1e-9)
+print(f'Applied B field is: {applied_B:.1f} mT')
+
+
+from tdgl.sources import LinearRamp, ConstantField
+# Ramp the applied field 
+applied_vector_potential = (
+    LinearRamp(tmin=10, tmax=110)
+    * ConstantField(applied_B, field_units="mT", length_units=IslandDevice.length_units)
+)
+
+def epsilon_func_time(r, *, t, excitation_site=excitation_site): 
+
+    excitation_site = excitation_site  # Define the excitation site
+    t_min =  600
+    t_max = 700
+    return epsilon_time(r, t, t_min = t_min, t_max = t_max, r0_list = r0_list, side_length = width_island, width = width, height = height, total_width = total_width, total_height = total_height,
+                 excitation_length = step_x, excitation_site=excitation_site, epsilon0=1, normal_epsilon=normal_epsilon, excitation_epsilon= 1)
+
+
+#  --------------------------------  Simulation  --------------------------------  #
+
+options = tdgl.SolverOptions(
+    solve_time= 1000,
+    current_units="uA",
+    field_units="mT",
+    output_file=os.path.join(file_path, f"excitation_solution_pp_{f:.2f}.h5"),
+)
+excitation_solution = tdgl.solve(
+    IslandDevice,
+    options,
+    applied_vector_potential = applied_vector_potential, 
+    disorder_epsilon= epsilon_func_time, 
+)
+
+
+#  --------------------------------  Simulation Analysis --------------------------------  #
+
+fig = excitation_solution.plot_order_parameter()
+order_parameter_path = os.path.join(file_path, f'order_parameter_pp_{f:.2f}.png')
+fig.savefig(order_parameter_path)
+
+fig, ax = excitation_solution.plot_currents()
+current_path = os.path.join(file_path, f'current_pp_{f:.2f}.png')
+fig.savefig(current_path)
+
+excitation_solution_video = make_video_from_solution(
+    excitation_solution,
+    quantities=["order_parameter", "phase", "scalar_potential"],
+    figsize=(6.5, 4),
+    save_dir= file_path,
+)
+display(excitation_solution_video)
+
+fig, ax = excitation_solution.dynamics.plot_all_pairs()
+voltage_path = os.path.join(file_path, f'voltage_pp_{f:.2f}.png')
+fig.savefig(voltage_path)

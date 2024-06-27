@@ -183,6 +183,7 @@ normal_epsilon = -0.8  # value for normal metal
 epsilon0 = 1  # value for superconducting metal
 excitation_epsilon = 1
 
+#  --------------------------------  Epsilon Distribution --------------------------------  #
 
 step_x = width_island * spacing_factor * np.sqrt(2)
 step_y = width_island * spacing_factor * np.sqrt(2)
@@ -255,6 +256,7 @@ plot_save_path = os.path.join(file_path, f'epsilon_distribution_sym_{f:.2f}.png'
 plt.savefig(plot_save_path)
 plt.show()
 
+#  --------------------------------  Device Construction --------------------------------  #
 # Build the device
 layer = tdgl.Layer(london_lambda=london_lambda, coherence_length=coherence_length, thickness=thickness, gamma=gamma)
 film = (
