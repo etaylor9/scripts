@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=hexagonalLatticenoProbePoints
 #SBATCH --output=slurm-%A.out
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=3
 #SBATCH --mem-per-cpu=8GB
 #SBATCH --time=48:00:00
 
@@ -34,8 +34,12 @@ for f in "${f_values[@]}"; do
     f_decimal=$(awk "BEGIN {print $f}")
 
     # Run the Python script with the --f and --outdir arguments
-    python $pyscript --f $f_decimal --outdir $outdir
+    python $pyscript --f $f_decimal --outdir $outdir &
 done
+
+# Wait for all background jobs to finish
+wait
 
 # Move the stdout log to the results directory
 mv "slurm-${SLURM_JOB_ID}.out" $outdir
+
