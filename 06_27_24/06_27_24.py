@@ -233,7 +233,7 @@ print(f"The area of the plaquette (rhombus) is: {areaUnitCell:.0f} nm^2")
 # number_flux_perUnitCell = applied_B*1E-3 * (areaUnitCell*1E-9*1E-9) / phi_0
 print(f'Filling Factor: {f:.2f}')
 
-applied_B = f * phi_0 * 1E3 / (areaUnitCell*1E-9*1e-9)
+applied_B = f * phi_0 * 1E3 / (areaUnitCell*1E-9*1e-9) / 10 
 print(f'Applied B field is: {applied_B:.1f} mT')
 
 
@@ -241,7 +241,7 @@ from tdgl.sources import LinearRamp, ConstantField
 # Ramp the applied field 
 applied_vector_potential = (
     LinearRamp(tmin=10, tmax=110)
-    * ConstantField(applied_B/10, field_units="mT", length_units=IslandDevice.length_units)
+    * ConstantField(applied_B, field_units="mT", length_units=IslandDevice.length_units)
 )
 
 #  --------------------------------  Simulation --------------------------------  #
@@ -261,8 +261,9 @@ excitation_solution = tdgl.solve(
 #  --------------------------------  Simulation Analysis --------------------------------  #
 
 order_parameter_path = os.path.join(file_path, f'order_parameter_sym_{f:.2f}.png')
-fig = excitation_solution.plot_order_parameter()
+fig , ax = excitation_solution.plot_order_parameter()
 fig.savefig(order_parameter_path)
+
 
 fig, ax = excitation_solution.plot_currents()
 current_path = os.path.join(file_path, f'current_sym_{f:.2f}.png')
