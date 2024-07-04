@@ -16,11 +16,11 @@ conda activate TDGL
 export LD_LIBRARY_PATH=${CONDA_PREFIX}/lib:${LD_LIBRARY_PATH}
 
 # Create output directory in scratch space
-outdir=$GROUP_SCRATCH/simulations/results/07_02_24/$SLURM_JOB_ID
+outdir=$GROUP_SCRATCH/simulations/results/07_03_24/$SLURM_JOB_ID
 mkdir -p $outdir
 
 # Specify the Python script path
-pyscript=$HOME/scripts/07_02_24/07_02_24.py
+pyscript=$HOME/scripts/07_03_24/07_03_24.py
 
 # Copy the Python script and this shell script to the results directory
 cp -u $pyscript $outdir/
