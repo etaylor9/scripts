@@ -357,7 +357,7 @@ excitation_solution = tdgl.solve(
 
 #  --------------------------------  Simulation Analysis --------------------------------  #
 
-fig = excitation_solution.plot_order_parameter()
+fig, ax = excitation_solution.plot_order_parameter()
 order_parameter_path = os.path.join(file_path, f'order_parameter_pp_{f:.2f}.png')
 fig.savefig(order_parameter_path)
 
