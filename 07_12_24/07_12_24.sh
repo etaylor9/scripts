@@ -16,7 +16,7 @@ conda activate TDGL
 export LD_LIBRARY_PATH=${CONDA_PREFIX}/lib:${LD_LIBRARY_PATH}
 
 # Create output directory in scratch space
-outdir=$GROUP_SCRATCH/simulations/results/07_12_24/IterateCoherenceLength/$SLURM_JOB_ID
+outdir=$GROUP_SCRATCH/simulations/results/07_12_24/Batch2/$SLURM_JOB_ID
 mkdir -p $outdir
 
 # Specify the Python script path
@@ -26,21 +26,19 @@ pyscript=$HOME/scripts/07_12_24/07_12_24.py
 cp -u $pyscript $outdir/
 cp -u $0 $outdir/
 
-# Define the values of f as fractions
-f_values=("1")
-coherence_lengths=("600" "500" "400" "300" "200" "50")
 
+# Define the value of f
+f="1"
 
-for f in "${f_values[@]}"; do
-    for coherence_length in "${coherence_lengths[@]}"; do
-        # Evaluate the fraction using awk
-        f_decimal=$(awk "BEGIN {print $f}")
+coherence_lengths=("400" "300" "200" "50")
 
-        # Run the Python script with the --f and --outdir arguments
-        python $pyscript --f $f_decimal --coherence_length $coherence_length --outdir $outdir
-    done
+for coherence_length in "${coherence_lengths[@]}"; do
+    # Evaluate the fraction using awk
+    f_decimal=$(awk "BEGIN {print $f}")
+
+    # Run the Python script with the --f and --outdir arguments
+    python $pyscript --f $f_decimal --coherence_length $coherence_length --outdir $outdir
 done
 
 # Move the stdout log to the results directory
 mv "slurm-${SLURM_JOB_ID}.out" $outdir
-

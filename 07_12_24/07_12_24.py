@@ -34,6 +34,7 @@ args = parser.parse_args()
 f = args.f
 file_path = args.outdir
 coherence_length = args.coherence_length
+print(f'Simulating for coherence length = {coherence_length} nm and filling factor f = {f:.2f}')
 
 # !!!!!  !!!!! # 
 
