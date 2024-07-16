@@ -267,7 +267,6 @@ plt.show()
 
 #  --------------------------------  Device Construction --------------------------------  #
 # Build the device
-coherence_length = 500 
 layer = tdgl.Layer(london_lambda=london_lambda, coherence_length=coherence_length, thickness=thickness, gamma=gamma)
 film = (
     tdgl.Polygon("film", points=box(total_width, total_height))

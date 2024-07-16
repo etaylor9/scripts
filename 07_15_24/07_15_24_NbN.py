@@ -1,7 +1,8 @@
 # -------------------------------- #
 # File Info: July 15th, 2024
     # Goals for this file: 
-    #     - 
+    #     - range of coherence lengths 
+    #     - make the region between completely normal (make normal epsilon =)
 # -------------------------------- #
 
 import os
@@ -173,12 +174,12 @@ num_squares_per_side = 20
 
 
 # Device Material Parameters
-london_lambda = 16  # nm
+london_lambda = 300  # nm
 thickness = 5  # nm
 gamma = 1
 
 # Epsilon values
-normal_epsilon = -1  # value for normal metal
+normal_epsilon = -0.8  # value for normal metal
 epsilon0 = 1  # value for superconducting metal
 excitation_epsilon = 1
 
@@ -302,8 +303,7 @@ print(f"The area of the plaquette (rhombus) is: {areaUnitCell:.0f} nm^2")
 # number_flux_perUnitCell = applied_B*1E-3 * (areaUnitCell*1E-9*1E-9) / phi_0
 print(f'Filling Factor: {f:.2f}')
 print(f'Coherence length: {coherence_length} nm')
-print(f'Value of normal epsilon is {normal_epsilon} nm')
-
+print('')
 
 factor = 5 
 applied_B = f * phi_0 * 1E3 / (factor * areaUnitCell * 1E-9 * 1e-9)  
