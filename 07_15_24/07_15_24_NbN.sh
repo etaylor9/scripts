@@ -2,7 +2,7 @@
 #SBATCH --job-name=NbN
 #SBATCH --output=slurm-%A.out
 #SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=8GB
+#SBATCH --mem-per-cpu=16GB
 #SBATCH --time=48:00:00
 
 set -x
