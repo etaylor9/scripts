@@ -27,6 +27,7 @@ parser = argparse.ArgumentParser(description='Hexagonal Josephson Junction Array
 parser.add_argument('--f', type=float, required=True, help='Filling factor')
 parser.add_argument('--outdir', type=str, required=True, help='Output directory')
 parser.add_argument('--coherence_length', type=int, required=True, help='Coherence length')
+parser.add_argument('--london_lambda', type=int, required=True, help='London Lambda')
 
 args = parser.parse_args()
 
